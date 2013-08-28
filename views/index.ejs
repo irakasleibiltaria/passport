@@ -1,0 +1,8 @@
+<% if (!user) { %>
+	<h2>Welcome! Please log in.</h2>
+<% } else { %>
+    <h2>Hello, <%= user.identifier %>.</h2>
+    <h2>Hello, <%= user.emails[0].value %>.</h2>
+    <h2>Hello, <%= user.name.givenName %>.</h2>
+    <h2>Hello, <%= user.name.familyName %>.</h2>
+<% } %>
