@@ -96,18 +96,29 @@ app.get('/auth/google',
 app.get('/auth/google/return',
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
-    console.log("######### /auth/google/return:" + req.user.emails[0].value);
 
+    // console.log(req.user);
+    // console.log("req.user.emails[0].value:" + req.user.emails[0].value);
+    authorizated(req.user.emails[0].value, res)
+
+    // console.log("######### /auth/google/return:" + req.user.emails[0].value);
+
+/*
     if (req.user.emails[0].value == "user@gmail.com") {
       console.log("OK!!!!!!!!!!!!!!!!")
     }
 
     res.redirect('/');
+*/
   });
 
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
+});
+
+app.get('/loginerror', function(req, res){
+  res.render('loginerror', { user: req.user });
 });
 
 app.listen(3000);
@@ -124,4 +135,61 @@ function ensureAuthenticated(req, res, next) {
 }
 
 // is a authorizated user?
-//function
+// read from google drive
+// http://mynixworld.wordpress.com/2013/02/23/transparently-download-from-google-drive/
+// http://nodejs.org/api/http.html
+// http://nodejs.org/api/https.html
+// https://github.com/mikeal/request
+
+function authorizated(user, res) {
+
+  var request = require('request');
+  request.get({url:'https://googledrive.com/host/0B_Sg5u85ykaTLUc3TU9CRnFDT2M', json:true}, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      console.log("user:" + user);
+      console.log(body.emails[0].email);
+
+      // console.log("body.user.emails[0].value:" + body.emails[0].value);
+
+      if (body.emails[0].email == user) {
+        console.log("OK!!!!!!!!!!!!!!!!");
+        res.redirect('/');
+      } else {
+        console.log("KO!!!!!!!!!!!!!!!!");
+        res.redirect('/loginerror');
+      }
+    }
+  })
+
+/*
+  var https = require('https');
+
+  var options = {
+    hostname: 'googledrive.com',
+    port: 443,
+    path: '/host/0B_Sg5u85ykaTLUc3TU9CRnFDT2M',
+    method: 'GET'
+  };
+
+  var req = https.request(options, function(res) {
+    // console.log("statusCode: ", res.statusCode);
+    // console.log("headers: ", res.headers);
+
+    var str = '';
+    res.on('data', function(d) {
+      //process.stdout.write(d);
+      str += d;
+    });
+
+    console.log(str);
+  });
+
+  req.end();
+
+  req.on('error', function(e) {
+    console.error(e);
+  });
+
+  return str;
+*/
+}
