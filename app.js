@@ -114,6 +114,8 @@ app.get('/auth/google/return',
 
 app.get('/logout', function(req, res){
   req.logout();
+  // req.session.destroy();
+  // session.destroy();
   res.redirect('/');
 });
 
@@ -140,6 +142,8 @@ function ensureAuthenticated(req, res, next) {
 // http://nodejs.org/api/http.html
 // http://nodejs.org/api/https.html
 // https://github.com/mikeal/request
+// http://book.mixu.net/ch5.html
+// https://developer.mozilla.org/en-US/docs/Using_native_JSON?redirectlocale=en-US&redirectslug=Using_JSON_in_Firefox
 
 function authorizated(user, res) {
 
@@ -147,17 +151,24 @@ function authorizated(user, res) {
   request.get({url:'https://googledrive.com/host/0B_Sg5u85ykaTLUc3TU9CRnFDT2M', json:true}, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       console.log("user:" + user);
-      console.log(body.emails[0].email);
+      console.log(body);
 
-      // console.log("body.user.emails[0].value:" + body.emails[0].value);
+      console.log(body.lenght);
+      console.log("-------");
 
-      if (body.emails[0].email == user) {
-        console.log("OK!!!!!!!!!!!!!!!!");
-        res.redirect('/');
-      } else {
-        console.log("KO!!!!!!!!!!!!!!!!");
-        res.redirect('/loginerror');
+      var emailok = false;
+      for (var key in body.users) {
+        console.log(body.users[key].email);
+        if (body.users[key].email == user) {
+          console.log("OK!!!!!!!!!!!!!!!!");
+          emailok = true;
+        }
       }
+
+      if (emailok)
+          res.redirect('/');
+      else
+        res.redirect('/loginerror');
     }
   })
 
